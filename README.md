@@ -30,6 +30,11 @@
 - `docs/DEPLOYMENT.md`
 - `docs/WIREGUARD_EGRESS.md`
 
+Для полного сброса и переустановки (удаление старого APP_DIR/БД/юнитов) используйте:
+```bash
+sudo bash install/reinstall_from_scratch.sh --yes
+```
+
 ## Локальная разработка
 
 ```bash

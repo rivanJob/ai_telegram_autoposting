@@ -16,10 +16,25 @@ $grok = new GrokClient();
 $telegram = new TelegramClient();
 $logger = App::logger();
 
-$jobService->requeueStaleRunning(Env::int('WORKER_STALE_RUNNING_MINUTES', 30));
+while (true) {
+    try {
+        $jobService->requeueStaleRunning(Env::int('WORKER_STALE_RUNNING_MINUTES', 30));
+        break;
+    } catch (Throwable $e) {
+        $logger->error('worker_bootstrap_failed', ['error' => $e->getMessage()]);
+        sleep(5);
+    }
+}
 
 while (true) {
-    $job = $jobService->lockNextNewJob();
+    try {
+        $job = $jobService->lockNextNewJob();
+    } catch (Throwable $e) {
+        $logger->error('worker_poll_failed', ['error' => $e->getMessage()]);
+        sleep(5);
+        continue;
+    }
+
     if (!$job) {
         sleep(2);
         continue;
