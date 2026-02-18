@@ -8,12 +8,17 @@
    ```bash
    cp install/config.env.example install/config.env
    ```
-2. Отредактируйте `install/config.env`: укажите домен, БД, Telegram, Grok и параметры WireGuard.
-3. Запустите установщик:
+2. Пройдите preflight: `docs/PREINSTALL_CHECKLIST.md` (обязательно перед первым запуском).
+3. Отредактируйте `install/config.env`: укажите домен, БД, Telegram, Grok и параметры WireGuard.
+4. Выполните dry-run:
+   ```bash
+   sudo bash install/install.sh --dry-run --non-interactive
+   ```
+5. Запустите установщик:
    ```bash
    sudo bash install/install.sh --non-interactive
    ```
-4. Проверьте развёртывание:
+6. Проверьте развёртывание:
    ```bash
    php bin/setup.php
    php bin/health.php
@@ -21,6 +26,7 @@
 
 См. также:
 - `docs/INSTALL_UBUNTU.md`
+- `docs/PREINSTALL_CHECKLIST.md`
 - `docs/DEPLOYMENT.md`
 - `docs/WIREGUARD_EGRESS.md`
 

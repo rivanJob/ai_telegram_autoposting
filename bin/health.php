@@ -31,4 +31,5 @@ try {
 }
 
 header('Content-Type: application/json');
-echo json_encode(['status' => in_array('pass', $checks, true) ? 'degraded' : 'ok', 'checks' => $checks], JSON_PRETTY_PRINT);
+$allChecksPassed = !in_array(false, array_map(static fn (string $result): bool => str_starts_with($result, 'pass'), $checks), true);
+echo json_encode(['status' => $allChecksPassed ? 'ok' : 'degraded', 'checks' => $checks], JSON_PRETTY_PRINT);

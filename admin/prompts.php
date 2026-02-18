@@ -19,10 +19,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && CsrfGuard::validate($_POST['_csrf']
 }
 $themes = $pdo->query('SELECT id,name FROM themes ORDER BY name')->fetchAll();
 $rows = $pdo->query('SELECT p.*,t.name AS theme FROM prompts p JOIN themes t ON t.id=p.theme_id ORDER BY p.id DESC LIMIT 100')->fetchAll();
+
 require __DIR__ . '/layout.php';
 ob_start(); ?>
-<h1>Менеджер промптов</h1>
-<p>Подсказка по переменным: <code>{{audience}}</code> <code>{{tone}}</code> <code>{{category}}</code> <code>{{season}}</code></p>
-<form method="post"><input type="hidden" name="_csrf" value="<?= e(CsrfGuard::token()) ?>"><div class="row"><select name="theme_id"><?php foreach($themes as $t):?><option value="<?= (int)$t['id'] ?>"><?= e($t['name']) ?></option><?php endforeach;?></select><input name="title" placeholder="Название промпта" required></div><textarea name="body" rows="8" placeholder="Промпт строго в формате JSON" required></textarea><button>Сохранить новую версию</button></form>
-<table><tr><th>ID</th><th>Тема</th><th>Версия</th><th>Название</th><th>Создано</th></tr><?php foreach($rows as $r): ?><tr><td><?= (int)$r['id'] ?></td><td><?= e($r['theme']) ?></td><td><?= (int)$r['version'] ?></td><td><?= e($r['title']) ?></td><td><?= e($r['created_at']) ?></td></tr><?php endforeach; ?></table>
+<div class="panel stack">
+    <p>Подсказка по переменным: нажмите на бейдж, чтобы вставить переменную в конец промпта.</p>
+    <div>
+        <?php foreach (['{{audience}}','{{tone}}','{{category}}','{{season}}','{{cta}}'] as $v): ?>
+            <button type="button" class="secondary" data-insert="<?= e($v) ?>" style="display:inline-block;width:auto;margin:0 6px 6px 0;"><?= e($v) ?></button>
+        <?php endforeach; ?>
+    </div>
+    <form method="post" class="stack">
+        <input type="hidden" name="_csrf" value="<?= e(CsrfGuard::token()) ?>">
+        <div class="row">
+            <div><label>Тема</label><select name="theme_id"><?php foreach($themes as $t):?><option value="<?= (int)$t['id'] ?>"><?= e($t['name']) ?></option><?php endforeach;?></select></div>
+            <div><label>Название версии</label><input name="title" placeholder="Например: продажа/дружелюбный тон" required></div>
+        </div>
+        <div>
+            <label>Тело промпта (ожидается строго JSON-ориентированный контент)</label>
+            <textarea id="prompt-body" name="body" rows="10" placeholder="Сформируй только JSON..." required></textarea>
+        </div>
+        <button>Сохранить новую версию</button>
+    </form>
+</div>
+
+<div class="panel">
+    <h3>История версий</h3>
+    <table>
+        <tr><th>ID</th><th>Тема</th><th>Версия</th><th>Название</th><th>Создано</th></tr>
+        <?php foreach($rows as $r): ?>
+            <tr><td>#<?= (int)$r['id'] ?></td><td><?= e($r['theme']) ?></td><td><?= (int)$r['version'] ?></td><td><?= e($r['title']) ?></td><td class="mono"><?= e($r['created_at']) ?></td></tr>
+        <?php endforeach; ?>
+    </table>
+</div>
+<script>
+const promptBody = document.getElementById('prompt-body');
+document.querySelectorAll('[data-insert]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    promptBody.value = (promptBody.value + ' ' + btn.dataset.insert).trim();
+    promptBody.focus();
+  });
+});
+</script>
 <?php renderLayout('Менеджер промптов', ob_get_clean());
