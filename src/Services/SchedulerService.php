@@ -15,12 +15,13 @@ final class SchedulerService
     public function run(): int
     {
         $sql = "
-        INSERT INTO jobs (channel_id, theme_id, schedule_slot_id, run_at, status, post_type, prompt_snapshot)
+        INSERT INTO jobs (channel_id, theme_id, schedule_slot_id, run_at, run_at_key, status, post_type, prompt_snapshot)
         SELECT
             s.channel_id,
             s.theme_id,
             s.id,
             NOW(),
+            (FLOOR(EXTRACT(EPOCH FROM (NOW() AT TIME ZONE 'UTC')) / 60))::bigint,
             'NEW',
             COALESCE(sc.post_type_override, s.post_type),
             COALESCE(NULLIF(sc.prompt_override, ''), NULLIF(s.prompt_override, ''), COALESCE(p.body, ''))
