@@ -1,0 +1,41 @@
+<?php
+
+declare(strict_types=1);
+
+require __DIR__ . '/bootstrap.php';
+
+use Autoposter\Clients\GrokClient;
+use Autoposter\Clients\TelegramClient;
+use Autoposter\Core\App;
+use Autoposter\Core\Env;
+use Autoposter\Services\JobService;
+
+$pdo = App::db()->getConnection();
+$jobService = new JobService($pdo);
+$grok = new GrokClient();
+$telegram = new TelegramClient();
+$logger = App::logger();
+
+$jobService->requeueStaleRunning(Env::int('WORKER_STALE_RUNNING_MINUTES', 30));
+
+while (true) {
+    $job = $jobService->lockNextNewJob();
+    if (!$job) {
+        sleep(2);
+        continue;
+    }
+
+    try {
+        $prompt = (string)($job['prompt_snapshot'] ?: 'Generate Telegram post as strict JSON for post type text/photo/video/album/card');
+        $grokResult = $grok->generate($prompt);
+        $channel = $pdo->prepare('SELECT chat_id FROM channels WHERE id=:id');
+        $channel->execute([':id' => $job['channel_id']]);
+        $chatId = (string)$channel->fetchColumn();
+        $telegramResp = $telegram->publish($chatId, $grokResult['json']);
+        $jobService->markDone((int)$job['id'], $grokResult['json'], $telegramResp, $grokResult['raw']);
+        $logger->info('job_done', ['job_id' => $job['id']]);
+    } catch (Throwable $e) {
+        $jobService->markError((int)$job['id'], $e->getMessage());
+        $logger->error('job_error', ['job_id' => $job['id'], 'error' => $e->getMessage()]);
+    }
+}
