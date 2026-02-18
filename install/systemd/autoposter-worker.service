@@ -1,0 +1,21 @@
+[Unit]
+Description=Autoposter Worker
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=autoposter
+Group=autoposter
+WorkingDirectory=/opt/autoposter
+Environment=APP_ENV=production
+ExecStart=/usr/bin/php /opt/autoposter/bin/worker.php
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,10 @@
+[Unit]
+Description=Autoposter Scheduler Tick
+After=network-online.target postgresql.service
+
+[Service]
+Type=oneshot
+User=autoposter
+Group=autoposter
+WorkingDirectory=/opt/autoposter
+ExecStart=/usr/bin/php /opt/autoposter/bin/scheduler.php
