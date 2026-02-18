@@ -68,7 +68,7 @@ PG_DB_ESCAPED="${POSTGRES_DB//\'/\'\'}"
 
 run "sudo -u postgres psql -tAc \"SELECT 1 FROM pg_roles WHERE rolname='${PG_ROLE_ESCAPED}'\" | grep -q 1 || sudo -u postgres psql -c \"CREATE ROLE \\\"${POSTGRES_USER}\\\" LOGIN PASSWORD '${PG_PASS_ESCAPED}'\""
 run "sudo -u postgres psql -tAc \"SELECT 1 FROM pg_database WHERE datname='${PG_DB_ESCAPED}'\" | grep -q 1 || sudo -u postgres psql -c \"CREATE DATABASE \\\"${POSTGRES_DB}\\\" OWNER \\\"${POSTGRES_USER}\\\"\""
-run "cd ${APP_DIR} && composer install --no-dev --optimize-autoloader"
+run "cd ${APP_DIR} && COMPOSER_ALLOW_SUPERUSER=1 composer install --no-interaction --no-dev --optimize-autoloader"
 run "cd ${APP_DIR} && php bin/migrate.php"
 
 if [[ "$DRY_RUN" -eq 0 ]]; then

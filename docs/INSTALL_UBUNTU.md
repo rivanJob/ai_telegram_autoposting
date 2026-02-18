@@ -45,7 +45,10 @@ systemctl status autoposter-worker autoposter-scheduler.timer
 
 - Ошибка `generation expression is not immutable` при `php bin/migrate.php`:
   - обновите код до актуальной версии (`git pull`),
+  - убедитесь, что в `db/migrations/001_initial.sql` строка `run_at_key` — это `BIGINT NOT NULL` (а не `GENERATED ALWAYS AS ...`),
   - если это новая установка без данных: пересоздайте БД и повторите миграцию.
+- Если `git pull` возвращает `not a git repository`:
+  - разверните проект заново из git-клона или скопируйте актуальный код в директорию установки перед запуском install-скрипта.
 - Ошибка `no password supplied`:
   - убедитесь, что в `/opt/autoposter/.env` заполнены `DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASS`.
 - Если `autoposter-worker` падает из-за отсутствия таблиц (`relation "jobs" does not exist`):

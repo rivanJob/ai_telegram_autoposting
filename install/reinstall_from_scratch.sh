@@ -45,13 +45,20 @@ rm -rf "${APP_DIR}"
 rm -rf "${LOG_DIR:-/var/log/autoposter}"
 
 echo "[3/6] Сброс БД и роли..."
-sudo -u postgres psql -v db_name="${POSTGRES_DB}" -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = :'db_name' AND pid <> pg_backend_pid();" >/dev/null 2>&1 || true
-sudo -u postgres psql -v db_name="${POSTGRES_DB}" -c "DROP DATABASE IF EXISTS :\"db_name\";"
-sudo -u postgres psql -v role_name="${POSTGRES_USER}" -c "DROP ROLE IF EXISTS :\"role_name\";"
+PG_ROLE_ESCAPED="${POSTGRES_USER//\'/\'\'}"
+PG_DB_ESCAPED="${POSTGRES_DB//\'/\'\'}"
+
+sudo -u postgres psql -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='${PG_DB_ESCAPED}' AND pid <> pg_backend_pid();" >/dev/null 2>&1 || true
+sudo -u postgres psql -c "DROP DATABASE IF EXISTS \"${POSTGRES_DB}\";"
+sudo -u postgres psql -c "DROP ROLE IF EXISTS \"${POSTGRES_USER}\";"
 
 echo "[4/6] Обновление репозитория..."
 cd "$REPO_DIR"
-git pull --ff-only
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  git pull --ff-only
+else
+  echo "Пропуск git pull: ${REPO_DIR} не является git-репозиторием"
+fi
 
 echo "[5/6] Dry-run установщика..."
 bash "$SCRIPT_DIR/install.sh" --dry-run --non-interactive
