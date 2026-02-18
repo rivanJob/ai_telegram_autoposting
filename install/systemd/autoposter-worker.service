@@ -1,0 +1,16 @@
+[Unit]
+Description=AutoPoster Worker
+After=network.target
+
+[Service]
+Type=simple
+User=autoposter
+Group=autoposter
+WorkingDirectory=/opt/autoposter
+ExecStart=/usr/bin/php /opt/autoposter/bin/worker.php
+Restart=always
+RestartSec=3
+Environment=APP_ENV=production
+
+[Install]
+WantedBy=multi-user.target
