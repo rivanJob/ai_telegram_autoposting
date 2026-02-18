@@ -3,15 +3,33 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 CONFIG_FILE="$SCRIPT_DIR/config.env"
-DRY_RUN=0; SKIP_WIREGUARD=0; SKIP_NGINX=0; WITH_CERTBOT=0; NO_SERVICES=0
+DRY_RUN=0; SKIP_WIREGUARD=0; SKIP_NGINX=0; WITH_CERTBOT=0; NO_SERVICES=0; ALLOW_WIREGUARD_OFF=0
 run(){ [[ "$DRY_RUN" -eq 1 ]] && echo "[dry-run] $*" || eval "$@"; }
 while [[ $# -gt 0 ]]; do case "$1" in
-  --dry-run) DRY_RUN=1;; --non-interactive|--force) :;; --skip-wireguard) SKIP_WIREGUARD=1;; --skip-nginx) SKIP_NGINX=1;; --with-certbot) WITH_CERTBOT=1;; --no-services) NO_SERVICES=1;; *) echo "Неизвестный флаг: $1"; exit 1;; esac; shift; done
+  --dry-run) DRY_RUN=1;; --non-interactive|--force) :;; --skip-wireguard) SKIP_WIREGUARD=1;; --skip-nginx) SKIP_NGINX=1;; --with-certbot) WITH_CERTBOT=1;; --no-services) NO_SERVICES=1;; --allow-wireguard-off) ALLOW_WIREGUARD_OFF=1;; *) echo "Неизвестный флаг: $1"; exit 1;; esac; shift; done
 [[ -f "$CONFIG_FILE" ]] || { echo "Отсутствует $CONFIG_FILE"; exit 1; }
 source "$CONFIG_FILE"
 
 required=(DOMAIN TIMEZONE APP_DIR LOG_DIR POSTGRES_HOST POSTGRES_PORT POSTGRES_DB POSTGRES_USER POSTGRES_PASS TELEGRAM_BOT_TOKEN GROK_API_URL GROK_API_KEY GROK_MODEL ADMIN_BOOTSTRAP_USER ADMIN_BOOTSTRAP_PASS WIREGUARD_MODE WG_INTERFACE)
 for key in "${required[@]}"; do [[ -n "${!key:-}" ]] || { echo "Отсутствует обязательный параметр: $key"; exit 1; }; done
+
+placeholder_values=("change_me" "change_me_strong" "example.com" "admin@example.com" "@example_channel")
+for key in DOMAIN POSTGRES_PASS TELEGRAM_BOT_TOKEN TELEGRAM_CHANNEL_ID GROK_API_KEY ADMIN_BOOTSTRAP_USER ADMIN_BOOTSTRAP_PASS; do
+  value="${!key:-}"
+  for placeholder in "${placeholder_values[@]}"; do
+    if [[ "$value" == *"$placeholder"* ]]; then
+      echo "Обнаружено значение-заглушка в $key: $value"
+      echo "Заполните production-значения перед запуском (см. docs/PREINSTALL_CHECKLIST.md)."
+      exit 1
+    fi
+  done
+done
+
+if [[ "$WIREGUARD_MODE" == "off" && "$ALLOW_WIREGUARD_OFF" -ne 1 ]]; then
+  echo "WIREGUARD_MODE=off запрещён для production-запуска."
+  echo "Укажите on/required или явно добавьте --allow-wireguard-off (только для dev/test)."
+  exit 1
+fi
 
 export DEBIAN_FRONTEND=noninteractive
 PKGS=(nginx php8.2-fpm php8.2-pgsql php8.2-curl php8.2-mbstring php8.2-intl php8.2-zip composer postgresql postgresql-client rsync)
@@ -29,8 +47,8 @@ write_env APP_TIMEZONE "$TIMEZONE"; write_env DB_HOST "$POSTGRES_HOST"; write_en
 write_env TELEGRAM_BOT_TOKEN "$TELEGRAM_BOT_TOKEN"; write_env TELEGRAM_DEFAULT_CHANNEL "$TELEGRAM_CHANNEL_ID"; write_env GROK_API_URL "$GROK_API_URL"; write_env GROK_API_KEY "$GROK_API_KEY"; write_env GROK_MODEL "$GROK_MODEL"
 write_env WIREGUARD_MODE "$WIREGUARD_MODE"; write_env WG_INTERFACE "$WG_INTERFACE"; write_env ADMIN_IP_ALLOWLIST "${ADMIN_IP_ALLOWLIST:-}"; run "chmod 600 ${APP_DIR}/.env"
 
-run "sudo -u postgres psql -tc \"SELECT 1 FROM pg_roles WHERE rolname='${POSTGRES_USER}'\" | grep -q 1 || sudo -u postgres psql -c \"CREATE ROLE ${POSTGRES_USER} LOGIN PASSWORD '${POSTGRES_PASS}';\""
-run "sudo -u postgres psql -tc \"SELECT 1 FROM pg_database WHERE datname='${POSTGRES_DB}'\" | grep -q 1 || sudo -u postgres createdb -O ${POSTGRES_USER} ${POSTGRES_DB}"
+run "sudo -u postgres psql -v role_name=${POSTGRES_USER@Q} -v role_pass=${POSTGRES_PASS@Q} -c \"DO \\\$do\\\$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'role_name') THEN EXECUTE format('CREATE ROLE %I LOGIN PASSWORD %L', :'role_name', :'role_pass'); END IF; END \\\$do\\\$;\""
+run "sudo -u postgres psql -v db_name=${POSTGRES_DB@Q} -v role_name=${POSTGRES_USER@Q} -c \"SELECT format('CREATE DATABASE %I OWNER %I', :'db_name', :'role_name') WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = :'db_name')\" -t -A | sudo -u postgres psql"
 run "cd ${APP_DIR} && composer install --no-dev --optimize-autoloader"
 run "cd ${APP_DIR} && php bin/migrate.php"
 
