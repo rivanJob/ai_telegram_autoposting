@@ -48,6 +48,7 @@ fi
 
 id autoposter >/dev/null 2>&1 || run "useradd --system --home ${APP_DIR} --shell /usr/sbin/nologin autoposter"
 run "mkdir -p ${APP_DIR} ${LOG_DIR}"
+run "chown -R autoposter:autoposter ${LOG_DIR}"
 [[ "$REPO_DIR" != "$APP_DIR" ]] && run "rsync -a --delete --exclude .git ${REPO_DIR}/ ${APP_DIR}/"
 
 if [[ -f "${APP_DIR}/.env.example" ]]; then
@@ -61,6 +62,7 @@ write_env(){ key="$1"; val="$2"; run "grep -q '^${key}=' ${APP_DIR}/.env && sed 
 write_env APP_TIMEZONE "$TIMEZONE"; write_env DB_HOST "$POSTGRES_HOST"; write_env DB_PORT "$POSTGRES_PORT"; write_env DB_NAME "$POSTGRES_DB"; write_env DB_USER "$POSTGRES_USER"; write_env DB_PASS "$POSTGRES_PASS"
 write_env TELEGRAM_BOT_TOKEN "$TELEGRAM_BOT_TOKEN"; write_env TELEGRAM_DEFAULT_CHANNEL "$TELEGRAM_CHANNEL_ID"; write_env GROK_API_URL "$GROK_API_URL"; write_env GROK_API_KEY "$GROK_API_KEY"; write_env GROK_MODEL "$GROK_MODEL"
 write_env WIREGUARD_MODE "$WIREGUARD_MODE"; write_env WG_INTERFACE "$WG_INTERFACE"; write_env ADMIN_IP_ALLOWLIST "${ADMIN_IP_ALLOWLIST:-}"; run "chmod 600 ${APP_DIR}/.env"
+run "chown autoposter:autoposter ${APP_DIR}/.env"
 
 PG_ROLE_ESCAPED="${POSTGRES_USER//\'/\'\'}"
 PG_PASS_ESCAPED="${POSTGRES_PASS//\'/\'\'}"
