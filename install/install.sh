@@ -32,10 +32,19 @@ if [[ "$WIREGUARD_MODE" == "off" && "$ALLOW_WIREGUARD_OFF" -ne 1 ]]; then
 fi
 
 export DEBIAN_FRONTEND=noninteractive
-PKGS=(nginx php8.2-fpm php8.2-pgsql php8.2-curl php8.2-mbstring php8.2-intl php8.2-zip composer postgresql postgresql-client rsync)
+PKGS=(nginx php-fpm php-pgsql php-curl php-mbstring php-intl php-zip php-cli composer postgresql postgresql-client rsync)
 [[ "$WITH_CERTBOT" -eq 1 || "${CERTBOT_ENABLE:-0}" == "1" ]] && PKGS+=(certbot python3-certbot-nginx)
 [[ "$WIREGUARD_MODE" != "off" && "$SKIP_WIREGUARD" -eq 0 ]] && PKGS+=(wireguard-tools)
 run "apt-get update"; run "apt-get install -y ${PKGS[*]}"
+
+if [[ "$DRY_RUN" -eq 0 ]]; then
+  PHP_VERSION="$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')"
+  PHP_FPM_SOCK="/run/php/php${PHP_VERSION}-fpm.sock"
+  [[ -S "$PHP_FPM_SOCK" ]] || PHP_FPM_SOCK="$(find /run/php -maxdepth 1 -type s -name 'php*-fpm.sock' | head -n1)"
+  [[ -n "$PHP_FPM_SOCK" ]] || { echo "Не удалось определить сокет php-fpm"; exit 1; }
+else
+  PHP_FPM_SOCK='${PHP_FPM_SOCK}'
+fi
 
 id autoposter >/dev/null 2>&1 || run "useradd --system --home ${APP_DIR} --shell /usr/sbin/nologin autoposter"
 run "mkdir -p ${APP_DIR} ${LOG_DIR}"
@@ -67,7 +76,7 @@ PHP
 fi
 
 if [[ "$SKIP_NGINX" -eq 0 && "${NGINX_ENABLE:-1}" == "1" ]]; then
-  [[ "$DRY_RUN" -eq 0 ]] && DOMAIN="$DOMAIN" ADMIN_DOMAIN="${ADMIN_DOMAIN:-}" APP_DIR="$APP_DIR" envsubst < "${APP_DIR}/config/nginx.autoposter.conf" > /etc/nginx/sites-available/autoposter.conf
+  [[ "$DRY_RUN" -eq 0 ]] && DOMAIN="$DOMAIN" ADMIN_DOMAIN="${ADMIN_DOMAIN:-}" APP_DIR="$APP_DIR" PHP_FPM_SOCK="$PHP_FPM_SOCK" envsubst < "${APP_DIR}/config/nginx.autoposter.conf" > /etc/nginx/sites-available/autoposter.conf
   run "ln -sf /etc/nginx/sites-available/autoposter.conf /etc/nginx/sites-enabled/autoposter.conf"
   run "nginx -t"; run "systemctl reload nginx"
 fi
