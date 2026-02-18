@@ -1,0 +1,17 @@
+{
+  "name": "autoposter/saas",
+  "description": "Turnkey Telegram autoposter with Grok integration",
+  "type": "project",
+  "require": {
+    "php": "^8.2",
+    "ext-pdo": "*",
+    "ext-json": "*",
+    "ext-curl": "*",
+    "ext-mbstring": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "AutoPoster\\": "src/"
+    }
+  }
+}
