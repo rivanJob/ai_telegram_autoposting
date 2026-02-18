@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     theme_id BIGINT NOT NULL REFERENCES themes(id) ON DELETE RESTRICT,
     schedule_slot_id BIGINT NULL REFERENCES schedule_slots(id) ON DELETE SET NULL,
     run_at TIMESTAMPTZ NOT NULL,
-    run_at_key TIMESTAMPTZ GENERATED ALWAYS AS (date_trunc('minute', run_at)) STORED,
+    run_at_key TIMESTAMP GENERATED ALWAYS AS (date_trunc('minute', run_at AT TIME ZONE 'UTC')) STORED,
     status VARCHAR(16) NOT NULL CHECK(status IN ('NEW','RUNNING','DONE','ERROR')),
     post_type VARCHAR(16) NOT NULL DEFAULT 'text',
     attempts INTEGER NOT NULL DEFAULT 0,
