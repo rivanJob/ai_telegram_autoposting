@@ -1,0 +1,10 @@
+[Unit]
+Description=AutoPoster Scheduler Run
+After=network.target
+
+[Service]
+Type=oneshot
+User=autoposter
+Group=autoposter
+WorkingDirectory={{APP_DIR}}
+ExecStart=/usr/bin/php {{APP_DIR}}/bin/scheduler.php
