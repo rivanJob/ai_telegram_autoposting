@@ -62,8 +62,12 @@ write_env APP_TIMEZONE "$TIMEZONE"; write_env DB_HOST "$POSTGRES_HOST"; write_en
 write_env TELEGRAM_BOT_TOKEN "$TELEGRAM_BOT_TOKEN"; write_env TELEGRAM_DEFAULT_CHANNEL "$TELEGRAM_CHANNEL_ID"; write_env GROK_API_URL "$GROK_API_URL"; write_env GROK_API_KEY "$GROK_API_KEY"; write_env GROK_MODEL "$GROK_MODEL"
 write_env WIREGUARD_MODE "$WIREGUARD_MODE"; write_env WG_INTERFACE "$WG_INTERFACE"; write_env ADMIN_IP_ALLOWLIST "${ADMIN_IP_ALLOWLIST:-}"; run "chmod 600 ${APP_DIR}/.env"
 
-run "sudo -u postgres psql -v role_name=${POSTGRES_USER@Q} -v role_pass=${POSTGRES_PASS@Q} -c \"DO \\\$do\\\$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'role_name') THEN EXECUTE format('CREATE ROLE %I LOGIN PASSWORD %L', :'role_name', :'role_pass'); END IF; END \\\$do\\\$;\""
-run "sudo -u postgres psql -v db_name=${POSTGRES_DB@Q} -v role_name=${POSTGRES_USER@Q} -c \"SELECT format('CREATE DATABASE %I OWNER %I', :'db_name', :'role_name') WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = :'db_name')\" -t -A | sudo -u postgres psql"
+PG_ROLE_ESCAPED="${POSTGRES_USER//\'/\'\'}"
+PG_PASS_ESCAPED="${POSTGRES_PASS//\'/\'\'}"
+PG_DB_ESCAPED="${POSTGRES_DB//\'/\'\'}"
+
+run "sudo -u postgres psql -tAc \"SELECT 1 FROM pg_roles WHERE rolname='${PG_ROLE_ESCAPED}'\" | grep -q 1 || sudo -u postgres psql -c \"CREATE ROLE \\\"${POSTGRES_USER}\\\" LOGIN PASSWORD '${PG_PASS_ESCAPED}'\""
+run "sudo -u postgres psql -tAc \"SELECT 1 FROM pg_database WHERE datname='${PG_DB_ESCAPED}'\" | grep -q 1 || sudo -u postgres psql -c \"CREATE DATABASE \\\"${POSTGRES_DB}\\\" OWNER \\\"${POSTGRES_USER}\\\"\""
 run "cd ${APP_DIR} && composer install --no-dev --optimize-autoloader"
 run "cd ${APP_DIR} && php bin/migrate.php"
 
