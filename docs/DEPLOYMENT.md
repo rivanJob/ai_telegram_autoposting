@@ -1,38 +1,38 @@
-# Production Deployment
+# Продакшен-развёртывание
 
-## Components
+## Компоненты
 - Nginx + PHP-FPM
 - PostgreSQL
-- Systemd worker + scheduler timer
-- WireGuard policy routing for Grok egress
+- Systemd-воркер + таймер планировщика
+- Политическая маршрутизация WireGuard для исходящего трафика Grok
 
-## Services
+## Сервисы
 ```bash
 sudo systemctl restart autoposter-worker
 sudo systemctl restart autoposter-scheduler.timer
 ```
 
-## Backups
-Daily example:
+## Резервные копии
+Ежедневный пример:
 ```bash
 pg_dump -h 127.0.0.1 -U autoposter autoposter | gzip > /var/backups/autoposter-$(date +%F).sql.gz
 ```
-Retention: keep 14-30 days. Restore:
+Хранение: 14–30 дней. Восстановление:
 ```bash
 gunzip -c backup.sql.gz | psql -h 127.0.0.1 -U autoposter autoposter
 ```
 
-## Upgrades
+## Обновления
 ```bash
 git pull
 composer install --no-dev
 php bin/migrate.php
 sudo systemctl restart autoposter-worker autoposter-scheduler.timer
 ```
-Migrations are idempotent using `schema_migrations`.
+Миграции идемпотентны и используют таблицу `schema_migrations`.
 
-## Security notes
-- Keep `.env` mode 600
-- Rotate bootstrap credentials
-- Use HTTPS and optionally certbot
-- Consider admin IP allowlist at nginx and app levels
+## Примечания по безопасности
+- Держите `.env` с правами 600
+- Регулярно меняйте bootstrap-учётные данные
+- Используйте HTTPS и при необходимости certbot
+- Рассмотрите allowlist IP для админки на уровне nginx и приложения

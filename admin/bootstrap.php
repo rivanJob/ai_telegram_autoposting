@@ -31,7 +31,7 @@ if ($allowlist) {
     $ip = $_SERVER['REMOTE_ADDR'] ?? '';
     if (!in_array($ip, $allowlist, true)) {
         http_response_code(403);
-        echo 'Access denied';
+        echo 'Доступ запрещён';
         exit;
     }
 }

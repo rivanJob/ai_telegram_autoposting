@@ -1,181 +1,181 @@
-# AUTPOSTER SYSTEM — ROADMAP
-Version: 1.1
-Status: CANONICAL IMPLEMENTATION PLAN
+# СИСТЕМА AUTPOSTER — ДОРОЖНАЯ КАРТА
+Версия: 1.1
+Статус: КАНОНИЧНЫЙ ПЛАН РЕАЛИЗАЦИИ
 
-Goal: deliver a complete “turnkey” autoposter + admin web interface with WireGuard egress for Grok.
-
----
-
-# PHASE 0 — REPO + FOUNDATION
-- Create project structure (src, admin, db, public, bin)
-- Composer setup
-- .env example
-- Basic logging
-- Nginx vhost template
-
-Deliverables:
-- working local bootstrap
-- README with setup
+Цель: создать полностью готовый «под ключ» автопостер и админ-интерфейс с исходящим трафиком Grok через WireGuard.
 
 ---
 
-# PHASE 1 — DATABASE (PostgreSQL)
-Design and implement migrations for:
+# ФАЗА 0 — РЕПОЗИТОРИЙ И ОСНОВА
+- Создать структуру проекта (src, admin, db, public, bin)
+- Настроить Composer
+- Добавить пример .env
+- Базовое логирование
+- Шаблон vhost для Nginx
+
+Результаты:
+- рабочий локальный bootstrap
+- README с инструкцией по запуску
+
+---
+
+# ФАЗА 1 — БАЗА ДАННЫХ (PostgreSQL)
+Спроектировать и реализовать миграции для:
 - channels
 - themes
-- prompts (versioned)
-- schedules (rules, slots, overrides)
+- prompts (с версиями)
+- schedules (правила, слоты, переопределения)
 - jobs
 - audit_log
-- admin_users (+ optional admin_sessions)
+- admin_users (+ опционально admin_sessions)
 - settings
 
-Deliverables:
-- migrations
-- seed (optional)
+Результаты:
+- миграции
+- сиды (опционально)
 
 ---
 
-# PHASE 2 — ADMIN AUTH + SECURITY BASE
-Implement:
-- Login with password hash
-- TOTP setup flow
-- Session hardening
-- CSRF tokens
-- Rate limit login
-- Security headers
-- Optional IP allowlist
-- Audit log (login success/fail, config changes)
+# ФАЗА 2 — АВТОРИЗАЦИЯ АДМИНА И БАЗОВАЯ БЕЗОПАСНОСТЬ
+Реализовать:
+- Вход с хешем пароля
+- Поток настройки TOTP
+- Усиление сессий
+- CSRF-токены
+- Ограничение попыток входа
+- Заголовки безопасности
+- Опциональный allowlist по IP
+- Аудит-лог (успех/ошибка входа, изменения конфигурации)
 
-Deliverables:
-- /admin working securely
-- admin can login only with 2FA
-
----
-
-# PHASE 3 — ADMIN UI “PRO” (beautiful & detailed)
-Implement Admin pages:
-1) Dashboard (stats, next runs, errors)
-2) Channels CRUD
-3) Themes CRUD
-4) Prompt Manager:
-   - editor with variables and snippets
-   - versioning and rollback
-5) Schedule Builder:
-   - weekly grid view
-   - date-range campaigns
-   - drag & drop slots
-   - exceptions/blackouts
-6) Jobs Monitor:
-   - filters (status, theme, channel, date)
-   - open job detail (raw JSON, raw LLM)
-   - retry / run now
-7) Test Lab:
-   - generate from selected theme
-   - JSON validation
-   - live Telegram preview
-   - send manually
-
-Deliverables:
-- UI is fully usable without editing files
-- DB becomes the main config
+Результаты:
+- безопасно работающий `/admin`
+- вход администратора только с 2FA
 
 ---
 
-# PHASE 4 — GROK CLIENT (with strict JSON + VPN awareness)
-Implement:
-- Grok HTTP client
-- strict JSON guard
-- schema validation (server-side)
-- store raw response and parsed JSON
-- optional “repair” attempt via second pass prompt (configurable)
+# ФАЗА 3 — ПРОФЕССИОНАЛЬНЫЙ ADMIN UI («красивый и подробный»)
+Реализовать страницы админки:
+1) Панель (статистика, ближайшие запуски, ошибки)
+2) CRUD каналов
+3) CRUD тем
+4) Менеджер промптов:
+   - редактор с переменными и сниппетами
+   - версионирование и откат
+5) Конструктор расписания:
+   - недельная сетка
+   - кампании по диапазону дат
+   - drag & drop слотов
+   - исключения/blackout-периоды
+6) Монитор задач:
+   - фильтры (статус, тема, канал, дата)
+   - просмотр деталей задачи (сырой JSON, сырой LLM)
+   - повтор / запуск сейчас
+7) Тестовая лаборатория:
+   - генерация по выбранной теме
+   - валидация JSON
+   - live-предпросмотр Telegram
+   - ручная отправка
 
-Deliverables:
-- reliable JSON output pipeline
+Результаты:
+- UI полностью пригоден без редактирования файлов
+- БД становится основным источником конфигурации
 
 ---
 
-# PHASE 5 — TELEGRAM CLIENT
-Implement:
+# ФАЗА 4 — КЛИЕНТ GROK (строгий JSON + awareness VPN)
+Реализовать:
+- HTTP-клиент Grok
+- строгую проверку JSON
+- валидацию схемы (на стороне сервера)
+- сохранение сырого ответа и разобранного JSON
+- опциональную «починку» вторым проходом (настраиваемо)
+
+Результаты:
+- надёжный конвейер JSON-вывода
+
+---
+
+# ФАЗА 5 — TELEGRAM CLIENT
+Реализовать:
 - sendMessage
 - sendPhoto
 - sendVideo
 - sendMediaGroup
-- buttons for card
-- message formatting rules
+- кнопки для card
+- правила форматирования сообщений
 
-Deliverables:
-- post types fully working
-
----
-
-# PHASE 6 — SCHEDULER
-Implement scheduler:
-- reads schedule from DB
-- creates jobs for due slots
-- prevents duplicates (unique constraint)
-- supports date-range overrides and exceptions
-- respects quiet hours and limits
-
-Deliverables:
-- cron-friendly scheduler
+Результаты:
+- все типы постов полностью работают
 
 ---
 
-# PHASE 7 — WORKER
-Implement worker:
-- fetch NEW jobs
-- mark RUNNING
-- call Grok (through VPN route)
-- validate JSON
-- publish to Telegram
-- mark DONE or ERROR
-- retry with backoff
+# ФАЗА 6 — ПЛАНИРОВЩИК
+Реализовать планировщик:
+- читает расписание из БД
+- создаёт задачи для наступивших слотов
+- предотвращает дубликаты (уникальное ограничение)
+- поддерживает переопределения диапазонов дат и исключения
+- учитывает quiet hours и лимиты
 
-Deliverables:
-- robust worker
+Результаты:
+- планировщик готов для cron
 
 ---
 
-# PHASE 8 — WIREGUARD EGRESS CONTROL
-Provide deployment scripts/instructions:
-Option A (recommended): route worker traffic via wg0 using fwmark + dedicated user.
-- Create linux user `autoposter`
-- Run worker as that user
-- iptables mangle OUTPUT mark for that user
+# ФАЗА 7 — ВОРКЕР
+Реализовать воркер:
+- берёт задачи со статусом NEW
+- ставит RUNNING
+- вызывает Grok (через VPN-маршрут)
+- валидирует JSON
+- публикует в Telegram
+- ставит DONE или ERROR
+- повторяет с backoff
+
+Результаты:
+- надёжный воркер
+
+---
+
+# ФАЗА 8 — КОНТРОЛЬ ИСХОДЯЩЕГО ТРАФИКА WIREGUARD
+Предоставить скрипты/инструкции развёртывания:
+Вариант A (рекомендуется): направлять трафик воркера через wg0 с fwmark и выделенным пользователем.
+- Создать linux-пользователя `autoposter`
+- Запускать воркер от этого пользователя
+- iptables mangle OUTPUT mark для этого пользователя
 - ip rule add fwmark -> table 51820
 - ip route add default dev wg0 table 51820
-- DNS considerations
+- учесть DNS
 
-Verification steps:
-- curl to Grok endpoint shows wg IP
-- tcpdump shows traffic over wg0
+Проверка:
+- curl к endpoint Grok показывает IP WireGuard
+- tcpdump показывает трафик в wg0
 
-Deliverables:
-- doc + example scripts
-
----
-
-# PHASE 9 — DEPLOYMENT + OPS
-- systemd units for worker + scheduler
-- log rotation
-- health endpoints (optional)
-- backups (pg_dump)
-- monitoring basics
-
-Deliverables:
-- production-ready deployment
+Результаты:
+- документация + пример скриптов
 
 ---
 
-# PHASE 10 — FINAL POLISH
-- UI polish (icons, layout, dark mode)
-- safety guardrails for content categories
-- additional templates and presets
+# ФАЗА 9 — РАЗВЁРТЫВАНИЕ И ЭКСПЛУАТАЦИЯ
+- systemd-юниты для воркера и таймера планировщика
+- ротация логов
+- health-эндпоинты (опционально)
+- бэкапы (pg_dump)
+- базовый мониторинг
 
-Deliverables:
-- “everything круто” turnkey result
+Результаты:
+- развёртывание готово к продакшену
 
 ---
 
-END OF ROADMAP
+# ФАЗА 10 — ФИНАЛЬНАЯ ПОЛИРОВКА
+- UI-полировка (иконки, компоновка, тёмная тема)
+- защитные ограничения для категорий контента
+- дополнительные шаблоны и пресеты
+
+Результаты:
+- «всё круто», turnkey-результат
+
+---
+
+КОНЕЦ ДОРОЖНОЙ КАРТЫ

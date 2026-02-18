@@ -27,7 +27,7 @@ if (!$user) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!CsrfGuard::validate($_POST['_csrf'] ?? null)) {
-        $error = 'Invalid CSRF';
+        $error = 'Недействительный CSRF';
     } else {
         $code = trim((string)($_POST['code'] ?? ''));
         if ($totp->verifyCode($user['totp_secret'], $code)) {
@@ -44,21 +44,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         App::audit()->log((int)$user['id'], 'login_2fa', 'fail', ['ip' => $_SERVER['REMOTE_ADDR'] ?? '', 'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '']);
-        $error = 'Invalid TOTP code';
+        $error = 'Неверный TOTP-код';
     }
 }
 
 require __DIR__ . '/layout.php';
 ob_start(); ?>
-<h1>Two-factor verification</h1>
+<h1>Двухфакторная проверка</h1>
 <?php if ($user['must_setup_totp']): ?>
-<p>Scan this URI in your authenticator:</p>
+<p>Отсканируйте этот URI в приложении-аутентификаторе:</p>
 <pre><?= e($totp->otpauthUri('AutoPoster', $user['email'], $user['totp_secret'])) ?></pre>
 <?php endif; ?>
 <?php if ($error): ?><p style="color:#f87171"><?= e($error) ?></p><?php endif; ?>
 <form method="post">
 <input type="hidden" name="_csrf" value="<?= e(CsrfGuard::token()) ?>">
-<label>Authenticator Code</label><input name="code" required pattern="\d{6}">
-<button>Login</button>
+<label>Код аутентификатора</label><input name="code" required pattern="\d{6}">
+<button>Войти</button>
 </form>
 <?php renderLayout('2FA', ob_get_clean());

@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && CsrfGuard::validate($_POST['_csrf']
 $rows = $pdo->query('SELECT * FROM themes ORDER BY id DESC')->fetchAll();
 require __DIR__ . '/layout.php';
 ob_start(); ?>
-<h1>Themes</h1>
-<form method="post" class="row"><input type="hidden" name="_csrf" value="<?= e(CsrfGuard::token()) ?>"><input name="name" required placeholder="Theme name"><input name="description" placeholder="Description"><label><input type="checkbox" name="is_enabled" checked> Enabled</label><button>Create Theme</button></form>
-<table><tr><th>ID</th><th>Name</th><th>Description</th><th>Status</th></tr><?php foreach($rows as $r): ?><tr><td><?= (int)$r['id'] ?></td><td><?= e($r['name']) ?></td><td><?= e($r['description']) ?></td><td><?= $r['is_enabled']?'enabled':'disabled' ?></td></tr><?php endforeach; ?></table>
-<?php renderLayout('Themes', ob_get_clean());
+<h1>Темы</h1>
+<form method="post" class="row"><input type="hidden" name="_csrf" value="<?= e(CsrfGuard::token()) ?>"><input name="name" required placeholder="Название темы"><input name="description" placeholder="Описание"><label><input type="checkbox" name="is_enabled" checked> Включено</label><button>Создать тему</button></form>
+<table><tr><th>ID</th><th>Название</th><th>Описание</th><th>Статус</th></tr><?php foreach($rows as $r): ?><tr><td><?= (int)$r['id'] ?></td><td><?= e($r['name']) ?></td><td><?= e($r['description']) ?></td><td><?= $r['is_enabled']?'включена':'выключена' ?></td></tr><?php endforeach; ?></table>
+<?php renderLayout('Темы', ob_get_clean());

@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && CsrfGuard::validate($_POST['_csrf']
 $rows = $pdo->query('SELECT * FROM channels ORDER BY id DESC')->fetchAll();
 require __DIR__ . '/layout.php';
 ob_start(); ?>
-<h1>Channels</h1>
-<form method="post" class="row"><input type="hidden" name="_csrf" value="<?= e(CsrfGuard::token()) ?>"><input name="name" placeholder="Name" required><input name="chat_id" placeholder="@channel or -100..." required><label><input type="checkbox" name="is_enabled" checked> Enabled</label><button>Save Channel</button></form>
-<table><tr><th>ID</th><th>Name</th><th>Chat ID</th><th>Status</th></tr><?php foreach($rows as $r): ?><tr><td><?= (int)$r['id'] ?></td><td><?= e($r['name']) ?></td><td><?= e($r['chat_id']) ?></td><td><span class="pill"><?= $r['is_enabled']?'enabled':'disabled' ?></span></td></tr><?php endforeach; ?></table>
-<?php renderLayout('Channels', ob_get_clean());
+<h1>Каналы</h1>
+<form method="post" class="row"><input type="hidden" name="_csrf" value="<?= e(CsrfGuard::token()) ?>"><input name="name" placeholder="Название" required><input name="chat_id" placeholder="@канал или -100..." required><label><input type="checkbox" name="is_enabled" checked> Включено</label><button>Сохранить канал</button></form>
+<table><tr><th>ID</th><th>Название</th><th>ID чата</th><th>Статус</th></tr><?php foreach($rows as $r): ?><tr><td><?= (int)$r['id'] ?></td><td><?= e($r['name']) ?></td><td><?= e($r['chat_id']) ?></td><td><span class="pill"><?= $r['is_enabled']?'включен':'выключен' ?></span></td></tr><?php endforeach; ?></table>
+<?php renderLayout('Каналы', ob_get_clean());
