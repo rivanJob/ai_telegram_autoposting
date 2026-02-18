@@ -40,3 +40,14 @@ systemctl status autoposter-worker autoposter-scheduler.timer
 ## 5) Первый вход
 
 Перейдите на `/admin/login.php`, войдите под bootstrap-пользователем и паролем, затем завершите настройку TOTP в приложении-аутентификаторе.
+
+## Troubleshooting
+
+- Ошибка `generation expression is not immutable` при `php bin/migrate.php`:
+  - обновите код до актуальной версии (`git pull`),
+  - если это новая установка без данных: пересоздайте БД и повторите миграцию.
+- Ошибка `no password supplied`:
+  - убедитесь, что в `/opt/autoposter/.env` заполнены `DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASS`.
+- Если `autoposter-worker` падает из-за отсутствия таблиц (`relation "jobs" does not exist`):
+  - завершите миграции (`php bin/migrate.php`),
+  - затем перезапустите сервисы `systemctl restart autoposter-worker autoposter-scheduler.timer`.
