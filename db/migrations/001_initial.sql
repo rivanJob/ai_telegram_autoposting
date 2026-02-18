@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     run_at TIMESTAMPTZ NOT NULL,
     run_at_key TIMESTAMPTZ GENERATED ALWAYS AS (date_trunc('minute', run_at)) STORED,
     status VARCHAR(16) NOT NULL CHECK(status IN ('NEW','RUNNING','DONE','ERROR')),
+    post_type VARCHAR(16) NOT NULL DEFAULT 'text',
     attempts INTEGER NOT NULL DEFAULT 0,
     prompt_snapshot TEXT NOT NULL DEFAULT '',
     parsed_payload JSONB NULL,

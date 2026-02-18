@@ -26,7 +26,8 @@ while (true) {
     }
 
     try {
-        $prompt = (string)($job['prompt_snapshot'] ?: 'Generate Telegram post as strict JSON for post type text/photo/video/album/card');
+        $postType = (string)($job['post_type'] ?? 'text');
+        $prompt = (string)($job['prompt_snapshot'] ?: sprintf('Generate Telegram post as strict JSON for post type %s', $postType));
         $grokResult = $grok->generate($prompt);
         $channel = $pdo->prepare('SELECT chat_id FROM channels WHERE id=:id');
         $channel->execute([':id' => $job['channel_id']]);
