@@ -13,14 +13,14 @@ $error = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!CsrfGuard::validate($_POST['_csrf'] ?? null)) {
-        $error = 'Invalid CSRF token';
+        $error = 'Недействительный CSRF-токен';
     } else {
         $email = trim((string)($_POST['email'] ?? ''));
         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         $key = $ip . ':' . $email;
 
         if (!$rateLimiter->allow('login', $key)) {
-            $error = 'Too many attempts. Try later.';
+            $error = 'Слишком много попыток. Попробуйте позже.';
             App::audit()->log(null, 'login', 'blocked', ['ip' => $ip, 'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '', 'email' => $email]);
         } else {
             $stmt = $pdo->prepare('SELECT * FROM admin_users WHERE email=:email AND is_active=TRUE');
@@ -39,19 +39,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $rateLimiter->hit('login', $key);
             App::audit()->log($user['id'] ?? null, 'login_password', 'fail', ['ip' => $ip, 'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '', 'email' => $email]);
-            $error = 'Invalid credentials';
+            $error = 'Неверные учётные данные';
         }
     }
 }
 
 require __DIR__ . '/layout.php';
 ob_start(); ?>
-<h1>Admin Login</h1>
+<h1>Вход администратора</h1>
 <?php if ($error): ?><p style="color:#f87171"><?= e($error) ?></p><?php endif; ?>
 <form method="post">
 <input type="hidden" name="_csrf" value="<?= e(CsrfGuard::token()) ?>">
 <label>Email</label><input name="email" type="email" required>
-<label>Password</label><input name="password" type="password" required>
-<button>Continue</button>
+<label>Пароль</label><input name="password" type="password" required>
+<button>Продолжить</button>
 </form>
-<?php renderLayout('Login', ob_get_clean());
+<?php renderLayout('Вход', ob_get_clean());

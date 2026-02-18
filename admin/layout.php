@@ -16,9 +16,9 @@ function renderLayout(string $title, string $content): void
     button{background:var(--accent);color:#00111f;font-weight:600;cursor:pointer}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #334155;padding:8px;text-align:left}
     .pill{padding:3px 8px;border-radius:999px;background:#334155}
-    </style></head><body><div class="app"><aside class="side"><h3>AutoPoster</h3>
-    <a href="/admin/index.php">Dashboard</a><a href="/admin/channels.php">Channels</a><a href="/admin/themes.php">Themes</a>
-    <a href="/admin/prompts.php">Prompt Manager</a><a href="/admin/schedule.php">Schedule Builder</a><a href="/admin/jobs.php">Jobs Monitor</a>
-    <a href="/admin/test_lab.php">Test Lab</a><a href="/admin/audit.php">Audit Log</a><a href="/admin/logout.php">Logout</a>
+    </style></head><body><div class="app"><aside class="side"><h3>Автопостер</h3>
+    <a href="/admin/index.php">Панель</a><a href="/admin/channels.php">Каналы</a><a href="/admin/themes.php">Темы</a>
+    <a href="/admin/prompts.php">Менеджер промптов</a><a href="/admin/schedule.php">Конструктор расписания</a><a href="/admin/jobs.php">Монитор задач</a>
+    <a href="/admin/test_lab.php">Тестовая лаборатория</a><a href="/admin/audit.php">Журнал аудита</a><a href="/admin/logout.php">Выход</a>
     </aside><main class="main">' . $content . '</main></div></body></html>';
 }

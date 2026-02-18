@@ -18,15 +18,15 @@ $nextRuns = $pdo->query("SELECT j.id,c.name AS channel,t.name AS theme,j.run_at 
 
 require __DIR__ . '/layout.php';
 ob_start(); ?>
-<h1>Dashboard</h1>
+<h1>Панель</h1>
 <div class="cards">
-<div class="card"><h3>Channels</h3><p><?= $stats['channels'] ?></p></div>
-<div class="card"><h3>Themes</h3><p><?= $stats['themes'] ?></p></div>
-<div class="card"><h3>Queued Jobs</h3><p><?= $stats['jobs_new'] ?></p></div>
-<div class="card"><h3>Error Jobs</h3><p><?= $stats['jobs_error'] ?></p></div>
+<div class="card"><h3>Каналы</h3><p><?= $stats['channels'] ?></p></div>
+<div class="card"><h3>Темы</h3><p><?= $stats['themes'] ?></p></div>
+<div class="card"><h3>Задачи в очереди</h3><p><?= $stats['jobs_new'] ?></p></div>
+<div class="card"><h3>Задачи с ошибкой</h3><p><?= $stats['jobs_error'] ?></p></div>
 </div>
-<h2>Next Runs</h2>
-<table><tr><th>ID</th><th>Channel</th><th>Theme</th><th>Run At</th></tr>
+<h2>Ближайшие запуски</h2>
+<table><tr><th>ID</th><th>Канал</th><th>Тема</th><th>Время запуска</th></tr>
 <?php foreach ($nextRuns as $row): ?><tr><td><?= (int)$row['id'] ?></td><td><?= e($row['channel']) ?></td><td><?= e($row['theme']) ?></td><td><?= e($row['run_at']) ?></td></tr><?php endforeach; ?>
 </table>
-<?php renderLayout('Dashboard', ob_get_clean());
+<?php renderLayout('Панель', ob_get_clean());

@@ -1,17 +1,17 @@
-# Ubuntu Auto Installer (22.04 / 24.04)
+# Автоматическая установка на Ubuntu (22.04 / 24.04)
 
-## 1) Prepare
+## 1) Подготовка
 ```bash
 cp install/config.env.example install/config.env
 nano install/config.env
 ```
 
-## 2) Install
+## 2) Установка
 ```bash
 sudo bash install/install.sh --non-interactive
 ```
 
-Optional flags:
+Необязательные флаги:
 - `--dry-run`
 - `--force`
 - `--skip-wireguard`
@@ -19,7 +19,7 @@ Optional flags:
 - `--with-certbot`
 - `--no-services`
 
-## 3) Validate
+## 3) Проверка
 ```bash
 cd /opt/autoposter
 php bin/setup.php
@@ -27,5 +27,5 @@ php bin/health.php
 systemctl status autoposter-worker autoposter-scheduler.timer
 ```
 
-## 4) First login
-Go to `/admin/login.php`, authenticate with bootstrap user/password, then complete TOTP in authenticator app.
+## 4) Первый вход
+Перейдите на `/admin/login.php`, войдите под bootstrap-пользователем и паролем, затем завершите настройку TOTP в приложении-аутентификаторе.

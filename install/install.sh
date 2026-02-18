@@ -6,12 +6,12 @@ CONFIG_FILE="$SCRIPT_DIR/config.env"
 DRY_RUN=0; SKIP_WIREGUARD=0; SKIP_NGINX=0; WITH_CERTBOT=0; NO_SERVICES=0
 run(){ [[ "$DRY_RUN" -eq 1 ]] && echo "[dry-run] $*" || eval "$@"; }
 while [[ $# -gt 0 ]]; do case "$1" in
-  --dry-run) DRY_RUN=1;; --non-interactive|--force) :;; --skip-wireguard) SKIP_WIREGUARD=1;; --skip-nginx) SKIP_NGINX=1;; --with-certbot) WITH_CERTBOT=1;; --no-services) NO_SERVICES=1;; *) echo "Unknown flag: $1"; exit 1;; esac; shift; done
-[[ -f "$CONFIG_FILE" ]] || { echo "Missing $CONFIG_FILE"; exit 1; }
+  --dry-run) DRY_RUN=1;; --non-interactive|--force) :;; --skip-wireguard) SKIP_WIREGUARD=1;; --skip-nginx) SKIP_NGINX=1;; --with-certbot) WITH_CERTBOT=1;; --no-services) NO_SERVICES=1;; *) echo "Неизвестный флаг: $1"; exit 1;; esac; shift; done
+[[ -f "$CONFIG_FILE" ]] || { echo "Отсутствует $CONFIG_FILE"; exit 1; }
 source "$CONFIG_FILE"
 
 required=(DOMAIN TIMEZONE APP_DIR LOG_DIR POSTGRES_HOST POSTGRES_PORT POSTGRES_DB POSTGRES_USER POSTGRES_PASS TELEGRAM_BOT_TOKEN GROK_API_URL GROK_API_KEY GROK_MODEL ADMIN_BOOTSTRAP_USER ADMIN_BOOTSTRAP_PASS WIREGUARD_MODE WG_INTERFACE)
-for key in "${required[@]}"; do [[ -n "${!key:-}" ]] || { echo "Missing required config: $key"; exit 1; }; done
+for key in "${required[@]}"; do [[ -n "${!key:-}" ]] || { echo "Отсутствует обязательный параметр: $key"; exit 1; }; done
 
 export DEBIAN_FRONTEND=noninteractive
 PKGS=(nginx php8.2-fpm php8.2-pgsql php8.2-curl php8.2-mbstring php8.2-intl php8.2-zip composer postgresql postgresql-client rsync)
@@ -63,6 +63,6 @@ if [[ "$WIREGUARD_MODE" != "off" && "$SKIP_WIREGUARD" -eq 0 ]]; then
   run "bash ${APP_DIR}/install/wireguard.sh ${APP_DIR}/install/config.env"
 fi
 
-echo "NEXT STEPS:"
+echo "СЛЕДУЮЩИЕ ШАГИ:"
 echo "- cd ${APP_DIR} && php bin/setup.php"
-echo "- Open https://${DOMAIN}/admin/login.php"
+echo "- Откройте https://${DOMAIN}/admin/login.php"

@@ -1,30 +1,30 @@
 # AI Telegram Autoposting
 
-Production-ready SaaS-grade Telegram autoposter with secure admin UI, PostgreSQL, Grok JSON generation, scheduler/worker architecture, and WireGuard egress enforcement.
+Готовый к продакшену Telegram-автопостер уровня SaaS с защищённой админ-панелью, PostgreSQL, генерацией JSON через Grok, архитектурой планировщик/воркер и принудительным исходящим трафиком через WireGuard.
 
-## Quick install (Ubuntu 22.04/24.04)
+## Быстрая установка (Ubuntu 22.04/24.04)
 
-1. Copy installer config:
+1. Скопируйте конфиг установщика:
    ```bash
    cp install/config.env.example install/config.env
    ```
-2. Edit `install/config.env` with your domain, DB, Telegram, Grok, and WireGuard settings.
-3. Run installer:
+2. Отредактируйте `install/config.env`: укажите домен, БД, Telegram, Grok и параметры WireGuard.
+3. Запустите установщик:
    ```bash
    sudo bash install/install.sh --non-interactive
    ```
-4. Validate deployment:
+4. Проверьте развёртывание:
    ```bash
    php bin/setup.php
    php bin/health.php
    ```
 
-See:
+См. также:
 - `docs/INSTALL_UBUNTU.md`
 - `docs/DEPLOYMENT.md`
 - `docs/WIREGUARD_EGRESS.md`
 
-## Local development
+## Локальная разработка
 
 ```bash
 composer install
@@ -33,4 +33,4 @@ php bin/migrate.php
 php -S 0.0.0.0:8080 -t public
 ```
 
-Open `http://localhost:8080/admin`.
+Откройте `http://localhost:8080/admin`.

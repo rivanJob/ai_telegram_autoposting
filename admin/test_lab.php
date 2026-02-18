@@ -25,12 +25,12 @@ if ($_SERVER['REQUEST_METHOD']==='POST' && CsrfGuard::validate($_POST['_csrf'] ?
     if ($action==='send' && isset($_SESSION['test_lab_json'])) {
         $chatId=(string)$_POST['chat_id'];
         (new TelegramClient())->publish($chatId, $_SESSION['test_lab_json']);
-        $message='Sent successfully';
+        $message='Успешно отправлено';
     }
 }
 require __DIR__ . '/layout.php';
 ob_start(); ?>
-<h1>Test Lab</h1><?php if($message):?><p><?= e($message) ?></p><?php endif; ?>
-<form method="post"><input type="hidden" name="_csrf" value="<?= e(CsrfGuard::token()) ?>"><label>Channel</label><select name="chat_id"><?php foreach($channels as $c):?><option value="<?= e($c['chat_id']) ?>"><?= e($c['name']) ?></option><?php endforeach;?></select><label>Theme</label><select name="theme_id"><?php foreach($themes as $t):?><option value="<?= (int)$t['id'] ?>"><?= e($t['name']) ?></option><?php endforeach;?></select><label>Prompt</label><textarea name="prompt" rows="8" placeholder="Generate strict JSON for post type text/photo/video/album/card" required></textarea><button name="action" value="generate">Generate + Validate</button><button name="action" value="send">Send Preview</button></form>
-<h2>Telegram-like Preview JSON</h2><pre><?= e($preview) ?></pre>
-<?php renderLayout('Test Lab', ob_get_clean());
+<h1>Тестовая лаборатория</h1><?php if($message):?><p><?= e($message) ?></p><?php endif; ?>
+<form method="post"><input type="hidden" name="_csrf" value="<?= e(CsrfGuard::token()) ?>"><label>Канал</label><select name="chat_id"><?php foreach($channels as $c):?><option value="<?= e($c['chat_id']) ?>"><?= e($c['name']) ?></option><?php endforeach;?></select><label>Тема</label><select name="theme_id"><?php foreach($themes as $t):?><option value="<?= (int)$t['id'] ?>"><?= e($t['name']) ?></option><?php endforeach;?></select><label>Промпт</label><textarea name="prompt" rows="8" placeholder="Сгенерируйте строгий JSON для типа поста text/photo/video/album/card" required></textarea><button name="action" value="generate">Сгенерировать + проверить</button><button name="action" value="send">Отправить предпросмотр</button></form>
+<h2>JSON предпросмотра в стиле Telegram</h2><pre><?= e($preview) ?></pre>
+<?php renderLayout('Тестовая лаборатория', ob_get_clean());

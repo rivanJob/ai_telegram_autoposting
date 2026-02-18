@@ -1,127 +1,127 @@
-# AUTPOSTER SYSTEM — AGENT INSTRUCTIONS (FOR CODEX)
-Version: 1.1
+# СИСТЕМА AUTPOSTER — ИНСТРУКЦИИ ДЛЯ АГЕНТА (ДЛЯ CODEX)
+Версия: 1.1
 
-You are implementing a complete turnkey system:
-- autonomous Grok content generation
-- Telegram autoposting
-- full admin web interface
-- strict security
-- WireGuard-only egress for Grok calls
+Вы реализуете полноценную систему «под ключ»:
+- автономная генерация контента через Grok
+- автопостинг в Telegram
+- полноценный веб-интерфейс администратора
+- строгая безопасность
+- исходящий трафик к Grok только через WireGuard
 
-You MUST strictly follow:
+Вы ДОЛЖНЫ строго следовать:
 - GLOBAL_RULES.md (v1.1)
 - ROADMAP.md (v1.1)
 
-No deviations.
+Без отклонений.
 
 ---
 
-# 1. PRIMARY OUTPUT
-Produce a working repository with:
-- migrations (PostgreSQL)
-- /admin secure UI
-- scheduler + worker scripts
-- Grok client with strict JSON
-- Telegram client supporting post types
-- deployment instructions including WireGuard routing
+# 1. ОСНОВНОЙ РЕЗУЛЬТАТ
+Сформируйте рабочий репозиторий с:
+- миграциями (PostgreSQL)
+- защищённым UI в `/admin`
+- скриптами планировщика и воркера
+- клиентом Grok со строгим JSON
+- клиентом Telegram с поддержкой типов постов
+- инструкциями по развёртыванию, включая маршрутизацию WireGuard
 
-Everything should run on one server.
+Всё должно работать на одном сервере.
 
 ---
 
-# 2. CODING REQUIREMENTS
-- PHP 8.2+ compatible
-- Use PDO with prepared statements
+# 2. ТРЕБОВАНИЯ К КОДУ
+- Совместимость с PHP 8.2+
+- Использовать PDO с подготовленными выражениями
 - Composer autoload
-- Clear folder structure
-- No secrets in code
-- Robust error handling
-- Minimal external libs (dotenv allowed; UI can be vanilla HTML/JS/CSS)
+- Понятная структура папок
+- Никаких секретов в коде
+- Надёжная обработка ошибок
+- Минимум внешних библиотек (dotenv допустим; UI может быть на ванильных HTML/JS/CSS)
 
 ---
 
-# 3. ADMIN UI REQUIREMENTS (“красивая и подробная”)
-UI must include:
-- Modern design (cards, clean layout, responsive)
-- Sidebar navigation
-- Forms with validation + tooltips
-- Schedule editor:
-  - weekly grid (Mon–Sun, time slots)
-  - date range campaigns
-  - exceptions/blackouts
-  - drag-and-drop reorder slots
-- Prompt editor:
-  - syntax highlighting (simple JS) OR well-formatted textarea with snippets
-  - variables picker (e.g. {{audience}}, {{tone}}, {{category}})
-  - version history
-- Post preview:
-  - how it looks in Telegram (title/text/tags/buttons)
-- Jobs table:
-  - filters, pagination
-  - job detail modal with raw JSON + raw LLM response
-  - retry/run-now buttons
+# 3. ТРЕБОВАНИЯ К ADMIN UI («красивая и подробная»)
+UI должен включать:
+- Современный дизайн (карточки, чистый layout, адаптив)
+- Боковую навигацию
+- Формы с валидацией + подсказками
+- Редактор расписания:
+  - недельная сетка (Пн–Вс, тайм-слоты)
+  - кампании по диапазону дат
+  - исключения/blackouts
+  - drag-and-drop сортировка слотов
+- Редактор промптов:
+  - подсветка синтаксиса (простой JS) ИЛИ аккуратное textarea со сниппетами
+  - выбор переменных (например, {{audience}}, {{tone}}, {{category}})
+  - история версий
+- Предпросмотр поста:
+  - как он выглядит в Telegram (заголовок/текст/теги/кнопки)
+- Таблица задач:
+  - фильтры, пагинация
+  - модальное окно деталей задачи с сырым JSON + сырым ответом LLM
+  - кнопки retry/run-now
 
-Admin actions must be written to audit_log.
-
----
-
-# 4. GROK JSON CONTRACT
-Worker must send prompts that force strict JSON only.
-If model returns invalid JSON:
-- job → ERROR
-- save raw response
-Optional: “repair” pass (configurable), then validate again.
+Действия в админке должны записываться в audit_log.
 
 ---
 
-# 5. WIREGUARD REQUIREMENT (MANDATORY)
-All Grok API requests must egress via WireGuard wg0.
+# 4. JSON-КОНТРАКТ GROK
+Воркер должен отправлять промпты, жёстко требующие только JSON.
+Если модель вернула невалидный JSON:
+- задача → ERROR
+- сохранить сырой ответ
+Опционально: этап «repair» (настраиваемо), затем повторная проверка.
 
-Implementation must provide:
-- deployment instructions
-- example iptables/ip rule commands for policy routing
-- recommended approach: run worker as dedicated Linux user and mark its packets
+---
 
-Agent must add docs:
+# 5. ТРЕБОВАНИЕ WIREGUARD (ОБЯЗАТЕЛЬНО)
+Все запросы к API Grok должны выходить через WireGuard wg0.
+
+Реализация должна включать:
+- инструкции по развёртыванию
+- примеры команд iptables/ip rule для policy routing
+- рекомендуемый подход: запуск воркера от выделенного Linux-пользователя и маркировка его пакетов
+
+Агент должен добавить документацию:
 - /docs/WIREGUARD_EGRESS.md
 - /docs/DEPLOYMENT.md
 
 ---
 
-# 6. IMPLEMENTATION STEPS (strict order)
-Follow ROADMAP phases sequentially:
+# 6. ШАГИ РЕАЛИЗАЦИИ (строгий порядок)
+Следуйте фазам ROADMAP последовательно:
 0 → 1 → 2 → ... → 10
 
-Each phase:
-- implement
-- ensure it runs
-- commit logical changes
+Для каждой фазы:
+- реализовать
+- убедиться, что всё запускается
+- сделать логичный коммит изменений
 
 ---
 
-# 7. MUST DELIVER FILES
-At minimum include:
-- README.md (quick start)
+# 7. ОБЯЗАТЕЛЬНЫЕ ФАЙЛЫ
+Как минимум должны быть:
+- README.md (быстрый старт)
 - .env.example
 - db/migrations/*.sql
 - bin/scheduler.php
 - bin/worker.php
-- src/* (clients, guards, services)
-- public/admin (or /admin) web UI
+- src/* (клиенты, guards, services)
+- public/admin (или /admin) web UI
 - docs/WIREGUARD_EGRESS.md
 - docs/DEPLOYMENT.md
 
 ---
 
-# 8. DEFINITION OF DONE
-System is DONE when:
-- Admin panel can configure channels/themes/prompts/schedules fully via UI
-- Scheduler creates jobs from configured schedules
-- Worker calls Grok via WireGuard routing and posts to Telegram
-- Post types work: text/photo/video/album/card
-- Security features are enabled (2FA, CSRF, rate limit, secure cookies)
-- Jobs/audit logs are visible in admin panel
+# 8. КРИТЕРИЙ ГОТОВНОСТИ
+Система считается ГОТОВОЙ, когда:
+- В админ-панели можно полностью настраивать каналы/темы/промпты/расписания через UI
+- Планировщик создаёт задачи из настроенных расписаний
+- Воркер вызывает Grok через WireGuard-маршрут и публикует в Telegram
+- Работают типы постов: text/photo/video/album/card
+- Включены механизмы безопасности (2FA, CSRF, rate limit, secure cookies)
+- В админке видны задачи и аудит-логи
 
 ---
 
-END OF AGENT INSTRUCTIONS
+КОНЕЦ ИНСТРУКЦИЙ ДЛЯ АГЕНТА
