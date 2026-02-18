@@ -51,3 +51,16 @@ systemctl status autoposter-worker autoposter-scheduler.timer
 - Если `autoposter-worker` падает из-за отсутствия таблиц (`relation "jobs" does not exist`):
   - завершите миграции (`php bin/migrate.php`),
   - затем перезапустите сервисы `systemctl restart autoposter-worker autoposter-scheduler.timer`.
+
+## Полная переустановка (с удалением приложения и БД)
+
+Если окружение сильно повреждено (частичные миграции, битые systemd-юниты, сломанный `.env`), используйте автоматический сценарий:
+
+```bash
+cd /path/to/repo
+cp install/config.env.example install/config.env   # если ещё не создан
+nano install/config.env
+sudo bash install/reinstall_from_scratch.sh --yes
+```
+
+Скрипт удаляет старый `APP_DIR`, дропает `POSTGRES_DB` и `POSTGRES_USER`, удаляет systemd-юниты `autoposter-*`, затем делает `git pull`, `install.sh --dry-run`, `install.sh --non-interactive`.
